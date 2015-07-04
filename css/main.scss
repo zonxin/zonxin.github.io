@@ -50,3 +50,13 @@ $on-laptop:        800px;
         "layout",
         "syntax-highlighting"
 ;
+
+.article-list.affix {top:2em;}
+#goto-top {
+    position:fixed;
+    bottom:7em;right:0;
+    color:$grey-color;
+    visibility:hidden;
+}
+#goto-top.affix {visibility:visible;}
+.post-content>p {    text-indent:2em; }

@@ -2,3 +2,12 @@
 <script src="{{ "/static/js/jquery.min.js" | prepend: site.baseurl}}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{{ "/static/js/bootstrap.min.js" | prepend: site.baseurl}}"></script>
+{% if page.mathjax %}
+<!-- MathJax -->
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"> </script>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: { autoNumber: "AMS" } }
+});
+</script>
+{% endif %}

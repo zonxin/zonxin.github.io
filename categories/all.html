@@ -1,15 +1,15 @@
 ---
 layout: default
-title: Update
-permalink: /categories/update/
+title: 全部文章
+permalink: /categories/all/
 ---
 
 <div class="home">
 
-  <h1 class="page-heading">{{ page.title }}</h1>
+  <h3>{{ page.title }}</h3>
 
   <ul class="post-list">
-    {% for post in site.categories.update %}
+    {% for post in site.posts %}
       <li>
         <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
         <h2>
