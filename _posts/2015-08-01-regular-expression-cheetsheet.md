@@ -1,7 +1,8 @@
 ---
 layout: post
 title: "正则表达式CheetSheet"
-categories: 正则表达式 CheetSheets
+categories: 编程语言 CheetSheets
+tags: 正则表达式
 ---
 
 正则表达式教程，参见[正则表达式30分钟入门](http://deerchao.net/tutorials/regex/regex-1.htm)

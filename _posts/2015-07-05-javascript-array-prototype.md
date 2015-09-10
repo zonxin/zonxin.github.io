@@ -1,7 +1,8 @@
 ---
 layout: post
 title: "Array.prototype中函数定义"
-categories: javascript
+categories: 前端开发 编程语言
+tags: javascript Array prototype
 ---
 
 在Ecmascript标准中我们常常看到这样的描述：

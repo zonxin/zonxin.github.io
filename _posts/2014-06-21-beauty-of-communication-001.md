@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "通信之美：从频域看调制"
+title:  "通信之美(1)：从频域看调制"
 categories: 通信
 tags: 调制 解调
 mathjax: true
@@ -22,25 +22,25 @@ mathjax: true
 
 函数与冲击函数卷积的结果就是把函数平移：
 
-![一个函数与冲击函数的卷积]({{ "/image/beauty-of-communication/001/juanji.png" }})
+![一个函数与冲击函数的卷积]({{ "/image/beauty-of-communication/001/juanji.png" | prepend:site.baseurl }})
 
 余弦函数\\\( cos(\omega\_0t) \\\)的傅里叶变换是：
 
-![余弦函数的卷积]({{ "/image/beauty-of-communication/001/yuxianhanshu.png" }})
+![余弦函数的卷积]({{ "/image/beauty-of-communication/001/yuxianhanshu.png" | prepend:site.baseurl }})
 
 时域乘积到频域就是卷积。那么\\\( f(t)cos(\omega\_0t) \\\)的傅里叶变换是(忽略前面的系数)：
 
-![余弦函数的卷积]({{ "/image/beauty-of-communication/001/tiaozhi.png" }})
+![余弦函数的卷积]({{ "/image/beauty-of-communication/001/tiaozhi.png" | prepend:site.baseurl }})
 
 好了，现在就已经把低频信号\\\( f(t) \\\)平移到了高频\\\( \omega\_0t \\\)附近，这就是调制，就这么简单。
 
 那么解调就是再平移回来:
 
-![余弦函数的卷积]({{ "/image/beauty-of-communication/001/jietiao.png" }})
+![余弦函数的卷积]({{ "/image/beauty-of-communication/001/jietiao.png" | prepend:site.baseurl }})
 
 然后只取低频信号就是原始信号 \\\( f(t) \\\)了。所以通信系统就是：
 
-![余弦函数的卷积]({{ "/image/beauty-of-communication/001/tongxinxitong.png" }})
+![余弦函数的卷积]({{ "/image/beauty-of-communication/001/tongxinxitong.png" | prepend:site.baseurl }})
 
 这就是最基本的调制系统，实际的实现就是在这个基础上的改进或是因为器件不理想添加了一些东西。对于早期的调制方式，比如AM、FM、PM、DSB、SSB等，因为没有成熟的数学理论所以在调制解调（主要是解调）方面的实现不是这样的。但是也是可以使用这种通用的调制解调方案的，所以说数学很重要。
 
