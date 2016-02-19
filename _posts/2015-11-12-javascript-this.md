@@ -5,11 +5,11 @@ categories: 前端开发
 tags: javascript this
 ---
 
-在 javascript 中，任何函数中都可以出现`this`，但是它的值是在运行时决定的。说简单一点儿就是`this`的值取决与你如何调用这个函数，而不是函数定义所在的位置。另外在函数调用的时候可以使用`apply/call`指定`this`这样就实现了代码的复用。大多数 javascript 的内置函数设计的尽量通用。
+在 javascript 中，任何函数中都可以出现`this`，但是它的值是在运行时决定的。说简单一点儿就是`this`的值取决与你如何调用这个函数，而不是函数定义所在的位置。另外在函数调用的时候可以使用`apply/call`指定`this`这样就实现了代码的复用。大多数javascript 的内置函数设计的尽量通用。
 
 ### 1.一般函数调用
 
-作为一个普通的函数，`this`的值在浏览器中是`window`在nodejs中是`global`（后面不做区分，假设在浏览器中执行）。在最外层的作用域中`this`为`window`。例如
+在一个普通的函数中，`this`的值在浏览器中是`window`在nodejs中是`global`（后面不做区分，假设在浏览器中执行）。在最外层的作用域中`this`为`window`。例如
 
 {% highlight javascript linenos %}
 console.log(this); //输出 window
@@ -21,7 +21,7 @@ function func()
 }
 {% endhighlight %}
 
-可是这样存在一个问题，如果一个函数是构造函数，一般在这个函数中是会给`this`添加属性的。谁也能不能保证不犯错误，在创建对象的时候有些时候我们写成了一般的函数调用，这个时候这一段代码就是给`window`添加属性，此时程序不会报错，但是明明又不是我们想要的（javascript的坑不止这一个）。所以为了让 javascript 变得更好，就提出了一种严格模式，在某一块代码的一开始写一句`"use strict"`，对于不支持的浏览器来说这个只是一个字符串。但是对于支持严格模式的浏览器来说，会进入严格模式。在严格模式下，一般的函数调用中 `this` 的值是 `undefined`。
+可是这样存在一个问题，如果一个函数是构造函数，一般在这个函数中是会给`this`添加属性的。谁也能不能保证不犯错误，有时候当我们想把函数作为构造函数的时候，可是却写成了一般函数调用的形式，这个时候这一段代码就是给`window`添加属性，此时程序不会报错，但是明明又不是我们想要的（javascript的坑不止这一个）。所以为了让 javascript 变得更好，就提出了一种严格模式，在某一块代码的一开始写一句`"use strict"`，对于不支持的浏览器来说这个只是一个字符串。但是对于支持严格模式的浏览器来说，会进入严格模式。在严格模式下，一般的函数调用中 `this` 的值是 `undefined`。
 
 {% highlight javascript linenos %}
 func(); //输出为 undefined
@@ -35,7 +35,7 @@ function func()
 
 ### 2.作为对象的方法
 
-如果一个函数作为对象的方法，也就是说调用方法是`对象.属性()`，那么这个时候所执行的函数中`this`就是这个对象的引用。
+如果函数作为对象的方法，也就是说调用方法是`对象.方法()`，那么这个时候所执行的函数中`this`就是这个对象的引用。
 
 {% highlight javascript linenos %}
 var obj={};
@@ -58,25 +58,23 @@ obj.f();    // obj
 (0,obj.f)(); //  window
 {% endhighlight %}
 
-其实前两个是等价的（`.` 的优先级比函数调用高）。`.`返回的不是`obj.f`中存储的值
-，而是返回`obj.f`包含`obj.f`信息的“对象”(这个只是 javascript内部实现时使用的，
-用 javascript 代码并不可访问)。
+前两个是等价的（`.` 的优先级比函数调用高）。其实，`.`运算符的返回值不是`obj.f`中存储的值，而是一个包含`obj.f`信息的“对象”(这个只是 javascript内部实现时使用的，用 javascript 代码并不可访问)。在ECMAScript 5.1 标准中对这个返回值的描述是：
 
-> Retrun a value of type Reference whose base value is baseValue and whose referenced name is propertypname,
-and whose strict mode flag is strict. --《ECMAScript 5.1》
+> Retrun a value of type Reference whose base value is **baseValue** and whose referenced name is **propertypname**,
+and whose strict mode flag is **strict**.
 
-其中 _baseValue_ 为`obj`， _propertypname_ 就是属性名`"f"`，后面那个标记是否处于严格模式。所以说这段话的意思就是`obj.f`的返回值是一个 _baseValue_ 为`obj`, _propertypname_ 为`"f"`的“对象”。而`this`的值其实是取上述返回值的 _baseValue_ ，所以`this`是`obj`。对于第三个，首先`a=obj.f`是一个赋值表达式，虽然 `obj.f`是一个包含`obj.f`信息的“对象”但是赋值表达式的返回值就是`=`右边返回值“求值”(`GetValue`)，把“对象”编程真正的值，所以表达式的返回值就是那个函数`func`。然后在对其调用，显然这个返回值的_baseValue_ 是没有定义的。而函数调用的时候，如果`this`为空值，那么就会让`this`等于`window`（非严格模式）。一般函数调用`this`是`window`的原因也是如此-- _baseValue_ 为空。最后一个跟第三个一样，只不过是赋值表达式换成了逗号表达式。
+本例中 **baseValue** 为`obj`， **propertypname**是字符串类型的属性名`"f"`，后面那个**strict**是是否处于严格模式的标记。所以说这段话的意思就是`obj.f`的返回值是一个 **baseValue** 为`obj`, **propertypname** 为`"f"`的“对象”。而`this`的值其实是取上述返回值的 **baseValue** ，因此，在函数中`this`是`obj`。对于第三个，首先`a=obj.f`是一个赋值表达式，虽然 `obj.f`的返回值是一个包含`obj.f`信息的“对象”，但是赋值表达式的返回值是`=`右边表达式的返回值“求值”(`GetValue`)，把“对象”中的值取出来，所以`a=obj.f`的返回值就是一个函数。然后再对这个函数进行调用调用，显然这个返回值的 **baseValue** 是没有定义的。而函数调用初始话作用域的时候，如果`this`为空值，那么就会让`this`等于`window`（非严格模式）。一般函数调用`this`是`window`的原因也是如此-- _baseValue_ 为空。最后一个与第三个相同，只不过是赋值表达式换成了逗号表达式。
 
 ### 3. 构造函数(关键字new)
 
-在new表达式中的 `this` 反而简单，就是一个新创建的以这个函数为原型的对象。
+在new表达式中的 `this` 反而简单，统一规定为一个新创建的以这个函数为原型的对象。
 
 {%highlight javascript linenos%}
 function fn(){ console.info(this instanceof fn) };
 var obj = new fn(); //输出 true
 {%endhighlight%}
 
-顺便说一下，new表达式的返回值：如果这个函数返回一个对象，那么new表达式的返回值是这个对象，否则就是新创建的这个对象。
+顺便说一下，new表达式的返回值：如果这个函数返回一个对象，那么new表达式的返回值是这个对象，否则返回值是新创建的这个对象。
 
 ### 4. 调用时指定this
 
@@ -84,15 +82,15 @@ var obj = new fn(); //输出 true
 
 {%highlight javascript linenos%}
 function fn(arg){ console.info(this) };
-fn.call("thisvalue"); // 输出 “thisvalue”, 实际为这个字符串转换成对象的值
+fn.call("thisvalue"); 
+// 输出 “thisvalue”, 实际为 toObject("thisvalue"),把这个字符串转换成对象
 {%endhighlight%}
 
-这样做的好处就是可以实现代码复用，javascript 中的内置函数后设计的尽可能通用，当一个对象满足某些条件的时候就可以用
-作为这个函数的`this`。可参考 [《Array.prototype中函数的定义》]({% post_url 2015-07-05-javascript-array-prototype %})
+这样做的好处就是可以实现代码复用，javascript 中的内置函数后设计的尽可能通用，当一个对象满足某些条件的时候就可以用作为这个函数的`this`。比如一个对象只要有`length`属性就可以作为`Array.prototype`中的函数的this，参考 [《Array.prototype中函数的定义》]({% post_url 2015-07-05-javascript-array-prototype %})
 
 ### 5. 上述说的都不对
 
-还有一种特殊情况，以上说的都是在非特殊情况下的。javascript可以指定一个固定的值作为`this`，无论如何调用这个函数`this`的值不变。产生这种函数的方式就是调用一个普通函数的`bind`方法，`bind`不仅可以指定`this`还可以指定函数调用的参数，其语法是`func.bind(this的值,可选参数1,....)`，其中可选参数是要绑定的参数。
+还有一种特殊情况，javascript可以指定一个固定的值作为`this`，无论如何调用这个函数`this`的值不变。产生这种函数的方式就是调用一个普通函数的`bind`方法，`bind`不仅可以指定`this`还可以指定函数调用的参数，其语法是`func.bind(this的值,可选参数1,....)`，其中可选参数是要绑定的参数，其余参数在调用的时候再给出。
 
 {%highlight javascript linenos%}
 function func() { console.info(this) }
@@ -145,7 +143,7 @@ DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元�
     show this
 </button>
 {% endhighlight %}
-上面代码中的`this`是它所在的DOM元素(button)。但是需要注意的是只有最外层作用域的`this`是所在的DOM元素，内层作用域代码中`this`的确定同前面几条。还是那句话，函数中`this`的值主要看函数是怎么被调用的，函数(内层作用域代码)是如何调用的我们清楚，所以我们可以确定，只是初始（外层）的作用域中的`this`我们不知道，需要统一规定。
+上面代码中的`this`是它所在的DOM元素(button)。但是需要注意的是只有最外层作用域的`this`是所在的DOM元素，内层作用域代码中`this`的确定同前面几条。还是那句话，函数中`this`的值主要看函数是怎么被调用的，函数(内层作用域代码)是如何调用的是我们自己的代码写的，所以我们可以确定`this`的值，只是初始（最外层）的作用域中的`this`我们不知道，需要统一规定。
 {% highlight html linenos %}
 <button onclick="console.log((function (){return this;})());">
     show inner this
@@ -165,9 +163,9 @@ DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元�
 1. 事件处理函数中的`this`是当前的触发事件的DOM元素(event.currentTarget)
 
 最后提一个问题
-下面代码输出什么？ 答案不是"window"
+下面代码输出什么？
 {%highlight javascript linenos%}
-obj = { go: function() { console.info(this) } } 
+obj = { go: function() { console.info(this) } };
 (0 || obj.go)() 
 {%endhighlight%}
 
