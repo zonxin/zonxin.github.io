@@ -11,7 +11,7 @@ tags: javascript this
 
 在一个普通的函数中，`this`的值在浏览器中是`window`在nodejs中是`global`（后面不做区分，假设在浏览器中执行）。在最外层的作用域中`this`为`window`。例如
 
-{% highlight javascript linenos %}
+{% highlight javascript linenos=table %}
 console.log(this); //输出 window
 func(); //输出为 window
 
@@ -23,7 +23,7 @@ function func()
 
 可是这样存在一个问题，如果一个函数是构造函数，一般在这个函数中是会给`this`添加属性的。谁也能不能保证不犯错误，有时候当我们想把函数作为构造函数的时候，可是却写成了一般函数调用的形式，这个时候这一段代码就是给`window`添加属性，此时程序不会报错，但是明明又不是我们想要的（javascript的坑不止这一个）。所以为了让 javascript 变得更好，就提出了一种严格模式，在某一块代码的一开始写一句`"use strict"`，对于不支持的浏览器来说这个只是一个字符串。但是对于支持严格模式的浏览器来说，会进入严格模式。在严格模式下，一般的函数调用中 `this` 的值是 `undefined`。
 
-{% highlight javascript linenos %}
+{% highlight javascript linenos=table %}
 func(); //输出为 undefined
 
 function func()
@@ -37,7 +37,7 @@ function func()
 
 如果函数作为对象的方法，也就是说调用方法是`对象.方法()`，那么这个时候所执行的函数中`this`就是这个对象的引用。
 
-{% highlight javascript linenos %}
+{% highlight javascript linenos=table %}
 var obj={};
 function func(){ console.info(this) }
 obj.f = func;
@@ -47,7 +47,7 @@ func(); //输出 window
 
 尝试一下代码的输出：
 
-{% highlight javascript linenos %}
+{% highlight javascript linenos=table %}
 function func {console.info(this)};
 var obj={};
 obj.f=func;
@@ -69,7 +69,7 @@ and whose strict mode flag is **strict**.
 
 在new表达式中的 `this` 反而简单，统一规定为一个新创建的以这个函数为原型的对象。
 
-{%highlight javascript linenos%}
+{%highlight javascript linenos=table%}
 function fn(){ console.info(this instanceof fn) };
 var obj = new fn(); //输出 true
 {%endhighlight%}
@@ -80,7 +80,7 @@ var obj = new fn(); //输出 true
 
 也很简单，在调用函数时可以显示的指明用哪个值作为`this`，所以这仅仅是一个语法问题。javascript给出的方式就是`apply/call`这两个函数只是在参数的形式上有些区别(这个区别不是本文的主要内容在此不讨论)。`call`函数的语法是`func.call(this的值，可选参数1,...)`，其中可选参数会传递给`func`。
 
-{%highlight javascript linenos%}
+{%highlight javascript linenos=table%}
 function fn(arg){ console.info(this) };
 fn.call("thisvalue"); 
 // 输出 “thisvalue”, 实际为 toObject("thisvalue"),把这个字符串转换成对象
@@ -92,7 +92,7 @@ fn.call("thisvalue");
 
 还有一种特殊情况，javascript可以指定一个固定的值作为`this`，无论如何调用这个函数`this`的值不变。产生这种函数的方式就是调用一个普通函数的`bind`方法，`bind`不仅可以指定`this`还可以指定函数调用的参数，其语法是`func.bind(this的值,可选参数1,....)`，其中可选参数是要绑定的参数，其余参数在调用的时候再给出。
 
-{%highlight javascript linenos%}
+{%highlight javascript linenos=table%}
 function func() { console.info(this) }
 bfunc = func.bind("bind this");
 bfunc(); // bind this
@@ -102,7 +102,7 @@ func();  // window
 
 一种常用，但是代码怎么写都有点儿乱的绑定(ES2015可以解决)，代码功能不用关心，只要知道如果`this`没有正确的值`this.doSomething`调用就会失败就可以了：
 
-{%highlight javascript linenos%}
+{%highlight javascript linenos=table%}
 var PageHandler = { 
     id: "123456", 
     init: function() {
@@ -123,7 +123,7 @@ PageHandler.init();
 ### 6. DOM事件回调函数
 
 作为浏览器中的javascript中还有一种函数调用，那就是事件回调函数。在事件回调函数中`this` 的值是当前触发该事件的DOM对象(部分浏览器只有使用`addEventListener`添加的事件才遵循此规定)。
-{% highlight javascript linenos %}
+{% highlight javascript linenos=table %}
 function evtHandle(e)
 {
     console.log(this === e.currentTarget); // 总为true
@@ -138,13 +138,13 @@ for(var i=0;i<elements.length; i++){
 #### 事件内联代码
 
 DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元素。
-{% highlight html linenos %}
+{% highlight html linenos=table %}
 <button onclick="console.log(this)">
     show this
 </button>
 {% endhighlight %}
 上面代码中的`this`是它所在的DOM元素(button)。但是需要注意的是只有最外层作用域的`this`是所在的DOM元素，内层作用域代码中`this`的确定同前面几条。还是那句话，函数中`this`的值主要看函数是怎么被调用的，函数(内层作用域代码)是如何调用的是我们自己的代码写的，所以我们可以确定`this`的值，只是初始（最外层）的作用域中的`this`我们不知道，需要统一规定。
-{% highlight html linenos %}
+{% highlight html linenos=table %}
 <button onclick="console.log((function (){return this;})());">
     show inner this
 </button>
@@ -164,7 +164,7 @@ DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元�
 
 最后提一个问题
 下面代码输出什么？
-{%highlight javascript linenos%}
+{%highlight javascript linenos=table%}
 obj = { go: function() { console.info(this) } };
 (0 || obj.go)() 
 {%endhighlight%}

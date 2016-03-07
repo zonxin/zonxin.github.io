@@ -13,7 +13,7 @@ tags: javascript Array prototype
 
 我们比较感兴趣的是的当我们有一个对象，那些我们需要的功能可是使用内置的这些函数来处理以及对这个对象的要求是什么。我们需要知道这些内置对象的实现。这个就需要我们去查阅Ecmascript协议标准，可是大家都懂得，标准写的还是很有技术水平的，不是一时半会儿可以看得懂的。所以我就用大家熟悉的javascript近似的实现了`Array.prototype`中的函数，供大家查阅。结果发现，其实一个对象基本是只要有length属性就可以使用这个对象作为`Array.prototype`中函数的this执行而不出错，而且length属性不必非要是数字。只要可以转换成整型就可以。另外让大家知道一个函数的具体作用没有比贴出源码更好的方式了（虽然大家都不喜欢看），因此这个也可以作为一个学习javascript的资料。最后，有些函数在低版本的浏览器中没有实现，因此可以用这些代码扩展低版本的浏览器。难免有所疏漏，请大家予以指正。
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 Array.prototype.constructor = Array;
 Array.prototype.toString = function(){
     //需要的属性 join

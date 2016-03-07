@@ -30,9 +30,8 @@ body {
  * Set `margin-bottom` to maintain vertical rhythm
  */
 h1, h2, h3, h4, h5, h6,
-p, blockquote, pre,
-ul, ol, dl, figure,
-%vertical-rhythm {
+p, blockquote,
+ul, ol, dl, figure {
     margin-bottom: $spacing-unit / 2;
 }
 
@@ -128,9 +127,8 @@ blockquote {
 pre,
 code {
     font-size: 15px;
-    border: 1px solid $grey-color-light;
     border-radius: 3px;
-    background-color: #eef;
+    background-color: transparent;
 }
 
 code {
@@ -139,7 +137,6 @@ code {
 
 pre {
     padding: 8px 12px;
-    overflow-x: scroll;
 
     > code {
         border: 0;

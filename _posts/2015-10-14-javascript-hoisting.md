@@ -7,7 +7,7 @@ tags: javascript
 
 与其他语言不同， javascript 的变量是可以先使用再声明的，函数一是可以先使用再定义（后面统一称为函数声明）的。先不讨论 ES6 里面的 let 和所有入门教程里所说的变量可以不声明可以直接使用。一段代码可以这样写
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 fn(1);
 function fn(a)
 {
@@ -25,7 +25,7 @@ Javascript 引擎在执行代码的时候会把所有的函数声明和提升到
 
 #### 1.1. 变量 
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 var a=1;
 function fn()
 {
@@ -39,7 +39,7 @@ fn();
 
 在函数中，第一次输出 `a` 并没有使用的全局变量`a`,而是本作用域中后面声明的`a`,但是由于没有给其赋值，所以是其值为`undefined`。Javascript 只有变量声明和变量赋值，还不存在变量初始化这个概念。`var a = 2;` 其实是声明变量，然后赋值为`2`的意思。第二次输出 `a` 并没有输出 `undefined`，因为通过变量声明提升，无论是第一次声明还是第二次声明这两次声明都在整个作用域的最前面（其实会忽略第二次声明）。 所以说第二次声明并不会导致`a = undefined`。其实上述代码相当于
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 var a=1;
 function fn()
 {
@@ -59,7 +59,7 @@ fn();
 
 同样对于函数也存在变量声明提升的情况。
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 function  f() { return "Global";}
 function fn()
 {
@@ -81,7 +81,7 @@ fn();
 #### 2.1 形参重名
 
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 function fn(a,a,a)
 {
     console(a);
@@ -95,7 +95,7 @@ fn(1);     // 输出 undefined
 
 ### 2.2 函数与形参重名
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 function fn(a)
 {
     function a() {}
@@ -110,7 +110,7 @@ fn(1);
 
 这里的 `arguments` 指的是函数中的那个特殊变量:`arguments`
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 function fn(arguments)
 {
     console.log(arguments); // 1
@@ -122,7 +122,7 @@ fn(1);
 
 ### 2.4 在变量中声明一个 "arguments"
 
-{% highlight javascript %}
+{% highlight javascript linenos=table %}
 function fn()
 {
     var arguments;
