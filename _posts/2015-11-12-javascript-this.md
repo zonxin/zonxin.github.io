@@ -11,7 +11,7 @@ tags: javascript this
 
 在一个普通的函数中，`this`的值在浏览器中是`window`在nodejs中是`global`（后面不做区分，假设在浏览器中执行）。在最外层的作用域中`this`为`window`。例如
 
-{% highlight javascript linenos=table %}
+{% highlight javascript linenos %}
 console.log(this); //输出 window
 func(); //输出为 window
 

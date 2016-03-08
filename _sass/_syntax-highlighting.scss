@@ -1,25 +1,19 @@
 /**
  * Syntax highlighting styles
  */
-table.highlighttable,.highlight table{
-    overflow-x:auto;
-    display:block;
-    font-weight:bold;
-    td.code {width:100%;}
-    width:100%;
-    .linenos {
-        background-color:#EEE8D5; 
-        code {color:#93A1A1 }
-    }
-    .lineno {color:#93A1A1 }
-    pre code {
-      white-space: pre;
-    }
-}
-figure.highlight > pre {border:0px;padding:0px}
 
 .highlight {
+    pre {border:none;border-radius:0px }
+    table {width:100%;}
+    table td.code{width:100%}
+    table pre { padding:8px 12px; }
+    .code pre {background:#FDF6E3; }
+    .lineno {background:#EEE8D5; }
+
     background:#FDF6E3;
+    display:block;
+    border-radius:10px;
+    overflow:hidden;
 
     .c     { color: #93A1A1; font-style: italic } // Comment
     .err   { color: #a61717; background-color: #e3d2d2 } // Error

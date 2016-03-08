@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "正则表达式CheetSheet"
-categories: 编程语言 CheetSheets
+categories: 编程语言 cheetsheets
 tags: 正则表达式
 ---
 
