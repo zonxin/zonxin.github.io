@@ -65,6 +65,17 @@ and whose strict mode flag is **strict**.
 
 本例中 **baseValue** 为`obj`， **propertypname**是字符串类型的属性名`"f"`，后面那个**strict**是是否处于严格模式的标记。所以说这段话的意思就是`obj.f`的返回值是一个 **baseValue** 为`obj`, **propertypname** 为`"f"`的“对象”。而`this`的值其实是取上述返回值的 **baseValue** ，因此，在函数中`this`是`obj`。对于第三个，首先`a=obj.f`是一个赋值表达式，虽然 `obj.f`的返回值是一个包含`obj.f`信息的“对象”，但是赋值表达式的返回值是`=`右边表达式的返回值“求值”(`GetValue`)，把“对象”中的值取出来，所以`a=obj.f`的返回值就是一个函数。然后再对这个函数进行调用调用，显然这个返回值的 **baseValue** 是没有定义的。而函数调用初始话作用域的时候，如果`this`为空值，那么就会让`this`等于`window`（非严格模式）。一般函数调用`this`是`window`的原因也是如此-- _baseValue_ 为空。最后一个与第三个相同，只不过是赋值表达式换成了逗号表达式。
 
+{% highlight javascript linenos %}
+function fn() { console.info(this); }
+function fnstrict() { 
+    'use strict'
+    console.info(this); 
+}
+fnstrict.call(undefined); // undefined
+fn.call(undefined); // window
+fn.call(null);      // window
+{% endhighlight %}
+
 ### 3. 构造函数(关键字new)
 
 在new表达式中的 `this` 反而简单，统一规定为一个新创建的以这个函数为原型的对象。
@@ -122,7 +133,7 @@ PageHandler.init();
 
 ### 6. DOM事件回调函数
 
-作为浏览器中的javascript中还有一种函数调用，那就是事件回调函数。在事件回调函数中`this` 的值是当前触发该事件的DOM对象(部分浏览器只有使用`addEventListener`添加的事件才遵循此规定)。
+作为浏览器中的javascript中还有一种函数调用，那就是事件回调函数。在事件回调函数中`this` 的值是当前触发该事件的DOM对象(部分浏览器只有使用`addEventListener`添加的事件才遵循此规定,说的就是IE)。
 {% highlight javascript linenos=table %}
 function evtHandle(e)
 {
@@ -151,6 +162,17 @@ DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元�
 {% endhighlight %}
 上述代码中的匿名函数就是一次普通的函数调用，所以`this`的值是`window`(非严格模式下)。
 
+#### 万恶的IE
+
+在IE下，用 `attachEvent` 添加的事件处理函数其中的`this`规定为 `window`：
+
+{% highlight javascript linenos%}
+// IE 下运行
+var el = document.getElementById("id");
+el.attachEvent('onclick',function(){ 
+    console.info(this);   // window
+}); 
+{% endhighlight %}
 ### 作为总结
 
 在 javascript 中，`this`的值取决与你如何调用这个函数，而不是函数定义所在的位置。函数的调用分为6种情况，也就是`this`的来源有6种：
@@ -160,7 +182,8 @@ DOM元素中添加的事件内联代码中的`this`就是当前的这个DOM元�
 1. new 表达式，`this`为以该函数为原型的新创建的对象
 1. 使用 `apply`/`call`指定 `this`
 1. 用`bind`绑定固定的`this`
-1. 事件处理函数中的`this`是当前的触发事件的DOM元素(event.currentTarget)
+1. 事件处理函数中的`this`是当前的触发事件的DOM元素(event.currentTarget)   
+   IE attachEvent添加的事件处理函数中`this`为`window`
 
 最后提一个问题
 下面代码输出什么？
