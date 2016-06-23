@@ -48,7 +48,7 @@ func(); //输出 window
 尝试一下代码的输出：
 
 {% highlight javascript linenos=table %}
-function func {console.info(this)};
+function func() {console.info(this)};
 var obj={};
 obj.f=func;
 
