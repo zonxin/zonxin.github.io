@@ -5,7 +5,7 @@ categories: 前端开发
 tags: javascript 单子 Monad 设计模式
 ---
 
-草稿：以下代码还完整测试
+草稿：代码未经测试，欢迎大家多提意见
 
 不得不说，LISP 和 Haskell 这样的语言正在极大的影响着各种编程语言。今天我们主要
 来看一下 Haskell 中的单子是个什么东西。Haskell 基于范畴论，范畴论属于抽象数学。
@@ -71,9 +71,9 @@ var grandma = mother(dad);
 function grandgrandma(name)
 {
     var dad = father(name);
-    if(dad) { return ""; } // 假设返回空表示错误
+    if(!dad) { return ""; } // 假设返回空表示错误
     var grandpa = father(dad);
-    if(grandpa) { return ""; }
+    if(!grandpa) { return ""; }
     return mother(grandpa);
 }
 {% endhighlight %}
@@ -98,13 +98,13 @@ var grandgrandma = compose(mother,father,father);
 虽然这样 `compose` 复杂了一点儿，但毕竟是"我们不关心的实现"。 只要“库”给我们提供了一个这样的
 `compose` 函数，我们就可以写出简洁的代码了。
 
-可是，很多时候代码要处理的不仅仅是"错误",所以一个"库"提供的不能仅仅只能是一种函
+可是，很多时候代码要处理的不仅仅是"错误",所以一个"库"提供的不能仅仅只是这种函
 数复合的方式。另外，这样获得一些函数的复合函数很容易，要获得“我们想要的数据”还是需要对这个函数进行调用。
-当仅仅需要对这个函数进行调用一次，就还需要对这个函数进行一次调用:
+当仅仅需要对这个函数进行调用一次，这样写就可能显得有点儿不太方便了:
 {% highlight javascript linenos %}
-var grandgrandmaName = compose(mother,father,father)("Peter");
+var grandgrandma = compose(mother,father,father)("Peter");
 {% endhighlight %}
-这样的代码还是不太方便阅读，毕竟人还是习惯从左到右读文字，即使把 `compose` 参数
+另外，这样的代码不太方便阅读，毕竟人还是习惯从左到右读文字，即使把 `compose` 参数
 的顺序改变一下也不方便阅读。如果把函数复合的方式"挂在"数据上，
 作为对象的方法是不是更好的呢？当想使用某种方式复合的时候选取合适的数据类型就好了。
 
@@ -134,7 +134,7 @@ function Just(x) { return new Maybe(x);}
 {% endhighlight %}
 其中`Nothing`表示处理出错，`Just`中保存了处理正确情况下的结果。这样做相当于在原
 始的字符串所有可能取值上额外添加了一个取值`Nothing`，这样就不需要用特殊值来表示
-错误。上述用空字符串来表示处理出错，但是谁能保证将来空字符串不可以表示一个合
+错误。原本代码使用空字符串来表示处理出错，但是谁能保证将来空字符串不可以表示一个合
 法的名字呢。改写一下`father` `mother`函数:
 {% highlight javascript linenos %}
 function father(name) 
@@ -154,11 +154,11 @@ function mother(name)
 {% endhighlight %}
 于是要获得一个人的曾祖母就可以写为:
 {% highlight javascript linenos %}
-var grandgrandmaName = father("Peter")
+var grandgrandma = father("Peter")
     .bindM(father)
     .bindM(mother);
     // 或者
-var grandgrandmaName = Just("Peter")
+var grandgrandma = Just("Peter")
     .bindM(father)
     .bindM(father)
     .bindM(mother);
@@ -166,12 +166,11 @@ var grandgrandmaName = Just("Peter")
 于是整个程序可以读为"Peter的 father 的 father 的 mother"，显然就是"Peter"的曾祖母。
 
 从另一个角度看，`mother` 函数仅仅是整个获取曾祖母函数中的一小部分, 当编写
-`mother`函数的时候"我们关心的数据"就是上一步执行正确时候的执行结果。获取的方式是：
+`mother`函数的时候"我们关心的数据"就是上一步执行正确时候的执行结果。可以使用这样的方式获得：
 {% highlight javascript linenos %}
-Just("Peter")
-    .bindM(father)
-    .bindM(father)
-    .bindM( function(x) {
+Just("Peter").bindM(father).bindM(father)
+    .bindM( function(x) { 
+        // 理解为 var x = Just("Peter").bindM(father).bindM(father)
         // x 就是这一小步中要处理的数据
     });
 {% endhighlight %}
@@ -282,20 +281,22 @@ var Promise = (function(){
     function Right(value) { var e = new Either(value);e._lr_="right";  return e;}
     
     function Promise(fn){
-        // 可以不写 return 
+        // 这样，在使用的时候可以不写 return 
         var ret;
         resolve = value => { ret = Right(value); };
-        reject = value =>  {ret = Left(value); };
+        reject = value =>  { ret = Left(value); };
         fn(resolve,reject);
         return ret;
     }
-});
+    return Promise;
+})();
  // 于是`father`函数就可以写为:
 function father(name)
 {
     // to do 链接数据库等
     return Promise( function(resolve,reject){
         if(Math.random() > 0.8) { 
+            // 通过上面对 Promise 的定义，这里可以不用写 return
             reject("Can not find " + name + "'s father"); // 不需要再写 return;
         }
         resolve(name + "'s father"); // 不需要再写 return;
@@ -303,8 +304,8 @@ function father(name)
 }
 {% endhighlight %}
 这样我们的代码就不受制于`Right`和`Left` 这两个变量名字。ES2015 就提供了一个这样
-的 `Promise` 对象，只是它的实现闭上述代码复杂，而且支持异步。不过既然是"我们关
-心的实现" 就不写实现了。不过呢，在ES2015 中，方法`bindM` 叫做`then`,也支持
+的 `Promise` 对象，只是它的实现比上述代码更复杂，而且支持异步操作(准确来说是异步操作)。不过既然是"我们不关
+心的实现" 就不写实现了。不过呢，在 ES2015 中，方法`bindM`叫做`then`,也支持
 `catch`。写个 AJAX 的例子:
 {% highlight javascript linenos %}
 var $ = jQuery;
@@ -322,22 +323,23 @@ getJSON("http://example.com/path/to/JSON")
     .then(info=>console.log(info))
     .catch(err => console.error(err));
 {% endhighlight %}
-使用方法和 `Either` 区别不大，只是这个是异步操作而已。另外，Promise 中的 `then` 是
+使用方法和 `Either` 区别不大，只不过`Either`不支持异步操作。另外，Promise 中的 `then` 是
 支持两个参数的，至于什么意义，自行搜索。
 
-像这样，定义了类似 `bindM` 函数的的数据类型(其实还有一个叫return的函数)，叫做单子Monad。
-不过这些函数是要满足某些性质，至于是什么样的性质，后面在做介绍。于是一大批数据类型都可以定义出
-符合要求的`bindM`,所以很多东西都是单子，只是这个 `bindM` 就看上去毫不相干了。不过，他们都有一个通用的
+像这样，定义了类似 `bindM` 函数的数据类型(其实还有一个叫return的函数)，叫做单子Monad。
+不过这些函数是要满足某些性质，至于是什么样的性质，后面再做介绍。而要求的这些性质比较少，于是一大批数据类型都可以定义出
+符合要求的`bindM`,所以很多东西都是单子，只是这些 `bindM` 就看上去毫不相干。不过，他们都有一个通用的
 目的，方便函数复合和调用，不同的 `bindM` 的实现定义了不同的复合方式。
 
 ### 2. 数组遍历
 
-数组也可以定义一个符合要求的 `bindM` 函数，而这个函数的作用就是完成类似数组遍历的作用。
+数组也可以定义一个符合要求的 `bindM` 函数，而这个函数的作用是完成类似数组遍历的作用[注]。
 {% highlight javascript linenos %}
 Array.prototype.bindM = function (fn){
     var len = this.length, result = [], i,ret;
     for(i = 0; i < len; i++){
         ret = fn(this[i]);
+        // ASSERT(ret instanceof Array);
         result = result.concat(ret);
     }
     return result;
@@ -345,21 +347,22 @@ Array.prototype.bindM = function (fn){
 {% endhighlight %}
 于是遍历数组就可以:
 {% highlight javascript linenos %}
+[1,2,3].bindM( x=> console.log(x));
+
 [1,2,3].bindM(x => {
-    // 此处 x 取值分别为 1,2,3
-    // 此处要求返回数组，否则下一个 .bindM 无法执行，concat 也不会得到想要的结果
-    return [x+10,x+100]; 
-    }).bindM(y =>{
-        return [y*10];
-    });
+    return [x+10,x+100]; // 此处 x 取值分别为 1,2,3
+}).bindM(y =>{
+    return [y*10]; // 为了保持类型的统一，此处最好是返回一个数组
+});
 // [110,1010,120,1020,130,1030]
 
 [1,2,3].bindM(x => {
     return [100,200,300].bindM( y => {
         // 这样写在这个函数里面就可以访问上一层的变量 x
        return [x+y]; 
-}})); // 执行结果 [101,201,301,102,202,203,301,302,303]
-// 如果只是展开第{% endhighlight %}
+}})); 
+//[101,201,301,102,202,203,301,302,303]
+{% endhighlight %}
 在第二段代码中 x 遍历 [1,2,3] 中的值, y遍历 [100,200,300] 中的值，返回值是着两个值的和
 [x+y]，因此最终会返回含有九个值的数组。从`bindM` 的实现来看，一个`bindM` 是一个`for`循环，
 两层 `bindM` 就是两层 `for` 循环，所以计算结果含有九个值。
@@ -381,10 +384,10 @@ Either 也可以用 do 语法糖。do 语法糖可以极大的简化代码，由
 为单子，定义`bindM` 函数，所以这样的代码出现率也特别高，写出来的程序可以很短。
 下面完成一个查询一个人的祖父母，外祖父母的函数(假设用Maybe),有点儿复杂，但是仔细看看还是可以看出来的:
 {% highlight javascript linenos %}
-var grandprants = Just("Peter").bindM( p =>{
-    father(p).bindM(dad => 
-        mother(p).bindM( mon => 
-            father(dad).bindM(g1 => 
+var grandprants = Just("Peter").bindM( p =>{ // var p = "Peter"
+    father(p).bindM(dad =>   //  var dad = father(p);
+        mother(p).bindM( mon =>  // var mon = mother(p);
+            father(dad).bindM(g1 => // var g1 = father(dad);
                  mother(dad).bindM(g2 => 
                      father(mon).bindM(g3 => 
                          mother(mon).bindM(g4 => 
@@ -409,7 +412,7 @@ grandprants = do
 
 上面说过，单子其实定义了一种函数复合的方式，当我们想使用不同的复合方式选择合适的数据类型就可以了。
 那么在数组里的这个`bindM` 定义了怎样的复合方式呢？下面以一个例子来说明，一个简单的问题:
-在一个 8x8 的棋盘上，象棋中的马经过三步从一个点到达那些点。
+在一个 8x8 的棋盘上，象棋中的马经过三步从一个点到达哪些点。
 
 {% highlight javascript linenos %}
 // 定义一个坐标
@@ -434,7 +437,7 @@ function moveKnight(pos)
     var code = doM(function(){
             next <- [new Point(x+2,y-1),new Point(x+2,y+1),new Point(x-2,y-1),new Point(x-2,y+1),
                      new Point(x+1,y-2),new Point(x+1,y+2),new Point(x-1,y-2),new Point(x-1,y+2)];
-            unNeededVar <- guard(isValidPos(next));
+            unNeededVar <- guard(isValidPos(next)); // [注]
             [next]; 
         },"");
     // console.log(code);
@@ -453,16 +456,16 @@ console.log(reachIn3(start));
 {% endhighlight %}
 此段代码中最不容易理解的估计就是 `guard` 函数了，这个函数仅仅是根据传入的参数返
 回一个空数组，或是含有一个元素的数组。通过上面对于 do 的介绍，我们知道`moveKnight` 
-里面的 doM 其实是两层的循环。对于第一层循环，循环的次数是 8,第二层会根据guard 的不同循环1次或是0次。
-即会有类似如下的代码，虽然看起来有点儿奇怪，但是很是很容易看懂的。
+里面的 doM 其实是两层的循环。对于第一层循环，循环的次数是 8,第二层会根据 guard 返回值的不同循环1次或是0次。
+这相当于一个`if`。即会有类似如下的代码，虽然看起来有点儿奇怪，但是还是很容易看懂的。
 {% highlight javascript linenos %}
 // var nextPoses = [...];
 var result=[];
 for(var i=0; i < nextPoses.length;i++){
     var next = nextPoses[i];
+    // 下面几句相当于 if(isValidPos(next))
     var t = guard(isValidPos(next));
     for(var j=0;j<t.length; j++) {
-    // 这几句相当于 if(isValidPos(next))
         var unNeededVar = t[j];
         result = result.concat([next]);
     }
@@ -470,6 +473,8 @@ for(var i=0; i < nextPoses.length;i++){
 {% endhighlight %}
 
 ### 3. 管道(pipe)
+
+#### 写一个简单的 gulp 模块
 
 ### 4. 状态单子
 
