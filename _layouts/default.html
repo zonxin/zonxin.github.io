@@ -10,7 +10,7 @@
     <div class="page-content">
       <div class="container">
         <div class="row">
-            <div class="col-xs-12 visible-xs-block">
+            <div class="col-xs-12 visible-xs-block" style="z-index:-1000">
                 <select style="width:75%;margin-bottom:1em" onchange="if(this.value) window.location.href=this.value">
                     <option value="">文章分类...</option>
                     <option value="{{ '/categories/all/' | prepend: site.baseurl }}">全部文章({{ site.posts | size }})</option>

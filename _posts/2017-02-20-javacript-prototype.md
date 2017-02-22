@@ -136,7 +136,7 @@ function NamePoint(name,x,y){
     Point.call(this,x,y); // super(x,y); 调用父类构造函数
     this.name = name;
 }
-// prototype 是什么类型的 NamedPoint 继承了哪个类
+// prototype 是什么类型的 NamedPoint 就继承了哪个类
 NamePoint.prototype = new Point(0,0);
 // delete Point.prototype.x;
 // delete Point.prototype.y;
