@@ -72,6 +72,10 @@ p1.__method__.show === p2.__method__.show; // true
 
 这样有点儿麻烦，但是 Javascript 正是使用了这种方法。解释器帮我们处理了一部分工作,所以我们方便的写出和上面工作原理一样的如下代码:
 
+<p style="text-align:center;text-indent:0">
+    <img src="{{ "/image/javascript/prototype-method.png" | prepend:site.baseurl }} "/><br />
+    <code>p1</code><code>p2</code>都可以通过自己的<code>__proto__</code>读取<code>show</code>方法
+</p>
 {% highlight javascript linenos %}
 function Point(x,y)
 {   // 当使用 new Point（即作为构造函数的时候）自动添加:
@@ -79,7 +83,7 @@ function Point(x,y)
     this.x = x; this.y = y;
 }
 Point.prototype = {  // PointMethod
-   show: function() { return "(" + this.x +"," + this.y + ")";}
+   show: function() { return "(" + this.x +"," + this.y + ")";},
    toValue: function() { return [this.x,this.y];}
 }
 var p1 = new Point(1,2);
@@ -126,7 +130,7 @@ class NamedPoint extends Point {
 var np = new NamedPoint("original",0,0);
 var p = new Point(1,2);
 np.show(); // "(0,0)"
-np.show === p; // true
+np.show === p.show; // true
 {% endhighlight %}
 
 其实要实现这样的方案也是不是很难，用之前面说过的知识就可以了。前面说过，当读取`np.show`的时候其实解释器读取的是以`np.show`, `np.__proto__.show`, `np.__proto__.__proto__.show` ...的顺序找的的第一个值。在`NamedPoint`里面没有`show` 方法，即`np.show`, `np.__proto__.show`都是不存在的。那么我们让`np.__proto__.__proto__` 等于 `Point.prototype` 那么`np.show`读取的就是`Point`中定义的方法`show`了！即`np.__proto__`(`NamedPoint.prototype`) 是`Point`类的变量。解决方案就现而易见了：
@@ -138,15 +142,14 @@ function NamePoint(name,x,y){
 }
 // prototype 是什么类型的 NamedPoint 就继承了哪个类
 NamePoint.prototype = new Point(0,0);
-// delete Point.prototype.x;
-// delete Point.prototype.y;
+// Namepoint.prototype.__proto__ = Point.prototype;
 Point.prototype.getName = function() { 
     return this.name;
 }
 var np = new NamedPoint("original",0,0);
 var p = new Point(1,2);
 np.show(); // "(0,0)"
-np.show === p; // true
+np.show === p.show; // true
 {% endhighlight %}
 
 虽然可以，但是比较麻烦，已经是javascript(ES5.1)里面最好的解决方案了。那么`Point`类继承了什么类？在上面的代码中，无论是默认的还是自定义的`Point.prototype`都是`Object`类。所以`Point`继承了`Object`类。这就是说`np.__proto__.__proto__.__proto__`是`Object.prototype`。所以：
