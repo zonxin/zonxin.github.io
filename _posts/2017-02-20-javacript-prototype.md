@@ -133,7 +133,14 @@ np.show(); // "(0,0)"
 np.show === p.show; // true
 {% endhighlight %}
 
-其实要实现这样的方案也是不是很难，用之前面说过的知识就可以了。前面说过，当读取`np.show`的时候其实解释器读取的是以`np.show`, `np.__proto__.show`, `np.__proto__.__proto__.show` ...的顺序找的的第一个值。在`NamedPoint`里面没有`show` 方法，即`np.show`, `np.__proto__.show`都是不存在的。那么我们让`np.__proto__.__proto__` 等于 `Point.prototype` 那么`np.show`读取的就是`Point`中定义的方法`show`了！即`np.__proto__`(`NamedPoint.prototype`) 是`Point`类的变量。解决方案就现而易见了：
+其实要实现这样的方案也是不是很难，用之前面说过的知识就可以了。前面说过，当读取`np.show`的时候其实解释器读取的是以`np.show`, `np.__proto__.show`, `np.__proto__.__proto__.show` ...的顺序找的的第一个值。在`NamedPoint`里面没有`show` 方法，即`np.show`, `np.__proto__.show`都是不存在的。那么我们让`np.__proto__.__proto__` 等于 `Point.prototype` 那么`np.show`读取的就是`Point`中定义的方法`show`了！即`np.__proto__`(`NamedPoint.prototype`) 是`Point`类的变量。即实现如图所示的结构:
+
+
+<p style="text-align:center;text-indent:0">
+    <img src="{{ "/image/javascript/np-prototype.png" | prepend:site.baseurl }} "/><br />
+</p>
+
+解决方案就现而易见了：
 
 {% highlight javascript linenos %}
 function NamePoint(name,x,y){
