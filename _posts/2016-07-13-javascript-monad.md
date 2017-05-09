@@ -77,8 +77,8 @@ function grandgrandma(name)
     return mother(grandpa);
 }
 {% endhighlight %}
-如果把错误处理的代码放到 `compose` 中，这样就不需要再在 `compose` 外面写错误处
-理了(为了更通用写的复杂了一点儿):
+这段代码中有好多讨厌的`if`，所以如果把错误处理的代码放到 `compose` 中，这样就不
+需要再在 `compose` 外面写错误处理了(为了更通用写的复杂了一点儿):
 {% highlight javascript linenos %}
 const ERROR="";
 function compose(f,g){
@@ -98,21 +98,22 @@ var grandgrandma = compose(mother,father,father);
 虽然这样 `compose` 复杂了一点儿，但毕竟是"我们不关心的实现"。 只要“库”给我们提供了一个这样的
 `compose` 函数，我们就可以写出简洁的代码了。
 
-可是，很多时候代码要处理的不仅仅是"错误",所以一个"库"提供的不能仅仅只是这种函
-数复合的方式。另外，这样获得一些函数的复合函数很容易，要获得“我们想要的数据”还是需要对这个函数进行调用。
-当仅仅需要对这个函数进行调用一次，这样写就可能显得有点儿不太方便了:
+可是，很多时候代码要处理的不仅仅是"错误",所以一个"库"提供的不能仅仅只是这种函数
+复合的方式。另外，这样获得一些函数的复合函数很容易，要获得“我们想要的数据”还是
+需要对这个函数进行调用。当仅仅需要对这个函数进行调用一次，这样写就可能显得有点
+儿不太方便了:
 {% highlight javascript linenos %}
 var grandgrandma = compose(mother,father,father)("Peter");
 {% endhighlight %}
 另外，这样的代码不太方便阅读，毕竟人还是习惯从左到右读文字，即使把 `compose` 参数
 的顺序改变一下也不方便阅读。如果把函数复合的方式"挂在"数据上，
-作为对象的方法是不是更好的呢？当想使用某种方式复合的时候选取合适的数据类型就好了。
+作为对象的方法是不是更好的呢？ **当想使用某种方式复合的时候选取合适的数据类型就好了**。
 
 ### 2. 错误处理
 
 这种"模式"主要用于错误处理以及顺序执行。或者说后面一步能否执行取决于前一步执行
-是否能正确执行。比如，链接数据库成功才能查询数据，查询成功才能发送数据给用户，
-如果其中任意一步出错则整个操作就失败了。
+是否能正确执行。就是上面`compose`类似的函数复合方式.比如，链接数据库成功才能查
+询数据，查询成功才能发送数据给用户，如果其中任意一步出错则整个操作就失败了。
 
 #### 2.1. Maybe
 简单一段"我们不关心的实现":
@@ -132,10 +133,11 @@ Maybe.prototype = {
 var Nothing = new Maybe();  // 约定此变量表示错误
 function Just(x) { return new Maybe(x);}
 {% endhighlight %}
-其中`Nothing`表示处理出错，`Just`中保存了处理正确情况下的结果。这样做相当于在原
-始的字符串所有可能取值上额外添加了一个取值`Nothing`，这样就不需要用特殊值来表示
-错误。原本代码使用空字符串来表示处理出错，但是谁能保证将来空字符串不可以表示一个合
-法的名字呢。改写一下`father` `mother`函数:
+其中`Nothing`表示处理出错,既然选择这个“库”提供的错误处理方式，就必须遵循这个规
+定，`Just`中保存了处理正确情况下的结果。这样做相当于在原始的字符串所有可能取值
+上额外添加了一个取值`Nothing`，这样就不需要用特殊值来表示错误。原本代码使用空字
+符串来表示处理出错，但是谁能保证将来空字符串不可以表示一个合法的名字呢。改写一
+下`father` `mother`函数:
 {% highlight javascript linenos %}
 function father(name) 
 {
@@ -158,7 +160,7 @@ var grandgrandma = father("Peter")
     .bindM(father)
     .bindM(mother);
     // 或者
-var grandgrandma = Just("Peter")
+var grandgrandma = Just("Peter") // 不严谨的说，这句表明我们使用Maybe提供的错误处理方式
     .bindM(father)
     .bindM(father)
     .bindM(mother);
@@ -176,10 +178,11 @@ Just("Peter").bindM(father).bindM(father)
 {% endhighlight %}
 通过上面"我们不关心的实现"中的 `bindM` 函数，可以知道匿名函数就是 `bindM` 的形
 参`fn`，而 `bindM` 给函数提供的参数就是 `Just` 中的值(上一步处理正确情况下的返
-回值为"Peter"的祖父),即 x 就是 "Peter"的祖父,是在这一小步中"我们关心的数据"。不
-过在此函数中只需要知道`x`是某个人，此函数是要完成查询一个人母亲的任务就好了，而
-不需要关心其他部分是如何实现的，它只需要做好查询一个人母亲的任务就好了。再写个
-例子，比如我们要过滤和处理用户的输入:
+回值为"Peter"的祖父),即 x 就是 "Peter"的祖父,是在这一小步中"我们关心的数据",
+**是前面所有步骤都执行正确情况下，这一步需要处理的数据**。不过在此函数中只需要知
+道`x`是某个人，此函数是要完成查询一个人母亲的任务就好了，而不需要关心其他部分是
+如何实现的，它只需要做好查询一个人母亲的任务就好了。再写个例子，比如我们要过滤
+和处理用户的输入:
 {% highlight javascript linenos %}
 var str = "user input";
 var Output = Just(str)
@@ -200,6 +203,7 @@ var Output = isNotEmpty(str)
     .bindM(isOneLine)
     .bindM(replacetab);
 if(Output.isNothing()) { console.log("输入不符合要求"); }
+// 又出现了讨厌的 if，其实可以消除
 {% endhighlight %}
 这样减小了函数粒度，提高了函数的复用性和可读性，而且多个函数的复合也是很简单的。
 
@@ -256,13 +260,14 @@ var grandgradma = father("Peter")
     .bindM(father)
     .bindM(mother)
     .catch(err=> {console.log(err);return "";});
+    // 这里的错误处理仅仅是回归到以前假设空表示出错。
 {% endhighlight %}
 上述代码还是存在问题，就是不支持异步操作，可是做为 Javascript 不支持异步怎么行呢？
 
 #### 1.3. Promise
 
-在上述 Either 的实现中会有三个全局变量`Either`,`Left`,`Right`，当然，最后的
-`return` 也可以不写。于是可以通过再复杂一点儿的实现只留下一个全局变量，如:
+在上述 Either 的实现中会有三个全局变量`Either`,`Left`,`Right`，这点我们不太喜欢
+。可是我们可以通过再复杂一点儿的实现只留下一个全局变量，如:
 {% highlight javascript linenos %}
 var Promise = (function(){
     // 原始 Either 实现
@@ -329,7 +334,8 @@ getJSON("http://example.com/path/to/JSON")
 像这样，定义了类似 `bindM` 函数的数据类型(其实还有一个叫return的函数)，叫做单子Monad。
 不过这些函数是要满足某些性质，至于是什么样的性质，后面再做介绍。而要求的这些性质比较少，于是一大批数据类型都可以定义出
 符合要求的`bindM`,所以很多东西都是单子，只是这些 `bindM` 就看上去毫不相干。不过，他们都有一个通用的
-目的，方便函数复合和调用，不同的 `bindM` 的实现定义了不同的复合方式。
+目的，方便函数复合和调用，不同的 `bindM` 的实现和定义了不同的复合方式。比如如果我们要进行有错误处理的复合
+我们可以选择`Maybe`或是`Either`。
 
 ### 2. 数组遍历
 
@@ -426,8 +432,8 @@ Point.prototype = {
 function isValidPos(pos) {
     return pos.x >= 1 && pos.x <= 8 && pos.y >= 1 && pos.y <= 8;
 }
-var Void = {};
-function guard(b) { return b?[Void]:[]; }
+var Unit = {};
+function guard(b) { return b?[Unit]:[]; }
 // 移动一步
 function moveKnight(pos)
 {
@@ -456,21 +462,29 @@ console.log(reachIn3(start));
 {% endhighlight %}
 此段代码中最不容易理解的估计就是 `guard` 函数了，这个函数仅仅是根据传入的参数返
 回一个空数组，或是含有一个元素的数组。通过上面对于 do 的介绍，我们知道`moveKnight` 
-里面的 doM 其实是两层的循环。对于第一层循环，循环的次数是 8,第二层会根据 guard 返回值的不同循环1次或是0次。
-这相当于一个`if`。即会有类似如下的代码，虽然看起来有点儿奇怪，但是还是很容易看懂的。
+里面的 doM 其实是两层的循环。对于第一层循环，循环的次数是 8, `next`遍历后面数组中的没一个值,第二层会根据 guard 返回值的不同循环1次或是0次。
+其实，这相当于一个`if`。即会有类似如下的代码，虽然看起来有点儿奇怪，但是还是很容易看懂的。
 {% highlight javascript linenos %}
 // var nextPoses = [...];
 var result=[];
 for(var i=0; i < nextPoses.length;i++){
-    var next = nextPoses[i];
+    var next = nextPoses[i]; // next 遍历所有的值
     // 下面几句相当于 if(isValidPos(next))
     var t = guard(isValidPos(next));
-    for(var j=0;j<t.length; j++) {
+    for(var j=0;j<t.length; j++) { // 循环 0 次或是 1 次
         var unNeededVar = t[j];
-        result = result.concat([next]);
+        result = result.concat([next]); //  把 next 放入结果
     }
 }
 {% endhighlight %}
+即这段代码的意思是，遍历所有可能的下一步的位置，检查这些位置是否合法，只过滤合法的结果。所以那个函数叫做`guard`(门卫)。
+
+数组提供的单子就是把前面处理得到的多个结果（数组），在分别用后面的函数处理，最
+后把所有结果放到一起。马移动一步可以移动到多个可能的位置，后面在移动一步就是遍
+历这些所有可能的位置，获得的结果就是移动两步可能到达的位置。所以，`reachin3` 其
+实列出了所有马移动三步所能到达的位置(不过没有除去重复的)。
+
+这就是数组定义的单子提供的复合方式。
 
 ### 3. 管道(pipe)
 
